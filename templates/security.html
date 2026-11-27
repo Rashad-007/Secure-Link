@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Security Architecture - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div class="d-inline-flex align-items-center mb-3 px-3 py-1 rounded-pill" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);">
+            <i class="bi bi-shield-check text-info me-2"></i>
+            <span class="text-info fw-semibold" style="font-size: 0.85rem;">Data Network Security &bull; Technical Specification</span>
+        </div>
+        <h1 class="display-5 fw-bold text-light mb-2">Cryptographic Architecture & Viva Guide</h1>
+        <p class="text-secondary" style="max-width: 750px; margin: 0 auto;">
+            Comprehensive academic breakdown of hybrid cryptographic principles, threat modeling, mathematical specifications, and college viva questions.
+        </p>
+    </div>
+
+    <!-- Section 1: Why Hybrid Cryptography? -->
+    <div class="cyber-card p-4 mb-4">
+        <h4 class="fw-bold text-light mb-3">
+            <i class="bi bi-diagram-3-fill text-info me-2"></i>1. The Hybrid Cryptography Paradigm
+        </h4>
+        <p class="text-secondary">
+            In modern network security, neither symmetric cryptography nor asymmetric cryptography is sufficient on its own:
+        </p>
+        <div class="row g-4 mt-1">
+            <div class="col-md-6">
+                <div class="p-3 rounded" style="background: #080d18; border: 1px solid #24344d;">
+                    <h6 class="fw-bold text-info"><i class="bi bi-speedometer me-1"></i> Symmetric Cryptography (AES-256)</h6>
+                    <ul class="text-muted small mb-0">
+                        <li><strong>Strength:</strong> Extremely high computational speed; hardware-accelerated via AES-NI instructions; optimal for bulk payloads.</li>
+                        <li><strong>Weakness:</strong> The "Key Exchange Problem" &mdash; how can two remote parties securely agree on a shared 256-bit secret without an eavesdropper intercepting it?</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded" style="background: #080d18; border: 1px solid #24344d;">
+                    <h6 class="fw-bold text-primary"><i class="bi bi-key me-1"></i> Asymmetric Cryptography (RSA-3072)</h6>
+                    <ul class="text-muted small mb-0">
+                        <li><strong>Strength:</strong> Solves key distribution. Public keys can be broadcast openly while only the holder of the private key can decrypt.</li>
+                        <li><strong>Weakness:</strong> Mathematically heavy modular exponentiations ($c = m^e \pmod n$); hundreds of times slower than AES; cannot encrypt large bulk files directly due to modulus size limits.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info border-0 mt-3 small mb-0" style="background: rgba(0, 240, 255, 0.08);">
+            <i class="bi bi-lightbulb-fill text-info me-1"></i>
+            <strong>SecureLink Hybrid Solution:</strong> SecureLink uses <strong class="text-light">AES-256-GCM</strong> to encrypt bulk file contents at blazing speed with authenticated integrity, and encapsulates only the small 256-bit AES key using <strong class="text-light">RSA-3072 / OAEP</strong>.
+        </div>
+    </div>
+
+    <!-- Section 2: Deep Dive into Algorithms -->
+    <div class="cyber-card p-4 mb-4">
+        <h4 class="fw-bold text-light mb-3">
+            <i class="bi bi-cpu-fill text-info me-2"></i>2. Cryptographic Algorithm Specifications
+        </h4>
+
+        <div class="accordion accordion-flush" id="algoAccordion">
+            <!-- AES-GCM -->
+            <div class="accordion-item bg-transparent border-secondary">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                        <span class="badge badge-cipher badge-aes me-2">AES-256-GCM</span> Authenticated Encryption with Associated Data (AEAD)
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#algoAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <p>
+                            Unlike legacy unauthenticated modes (such as CBC or ECB), AES-GCM provides both confidentiality and data authenticity simultaneously:
+                        </p>
+                        <ul>
+                            <li><strong>Key Size:</strong> 256 bits (32 bytes), offering $2^{256}$ keyspace, quantum-resistant against Grover's algorithm with an effective 128-bit quantum security level.</li>
+                            <li><strong>Nonce (IV):</strong> 96 bits (12 bytes) cryptographically random value per file transfer. Prevents replay attacks and identical ciphertext patterns.</li>
+                            <li><strong>GHASH Tag:</strong> 128-bit (16 bytes) authentication tag calculated using universal hashing over Galois Field $\text{GF}(2^{128})$. If even one bit is altered in ciphertext, the tag check fails during decryption.</li>
+                            <li><strong>Associated Data (AD):</strong> SecureLink binds the original filename as associated data, preventing filename spoofing attacks.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RSA-OAEP -->
+            <div class="accordion-item bg-transparent border-secondary">
+                <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                        <span class="badge badge-cipher badge-rsa me-2">RSA-3072</span> Optimal Asymmetric Encryption Padding (OAEP)
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#algoAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <p>
+                            RSA relies on the mathematical difficulty of the Integer Factorization Problem of product $n = p \times q$:
+                        </p>
+                        <ul>
+                            <li><strong>Key Length:</strong> 3072 bits. According to NIST Special Publication 800-57, RSA-3072 provides 128 bits of security equivalent, compliant beyond 2030 (whereas RSA-2048 provides only 112 bits).</li>
+                            <li><strong>Public Exponent:</strong> Fixed at $e = 65537$ ($2^{16} + 1$), maximizing encryption speed while preventing Coppersmith low-exponent attacks.</li>
+                            <li><strong>OAEP Padding:</strong> SecureLink enforces RSA-OAEP with SHA-256 Mask Generation Function (MGF1). This renders the cipher IND-CCA2 secure (indistinguishable under adaptive chosen-ciphertext attacks), completely eliminating Bleichenbacher or PKCS#1 v1.5 padding oracle attacks.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHA-256 vs GCM -->
+            <div class="accordion-item bg-transparent border-0">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                        <span class="badge badge-cipher badge-sha me-2">SHA-256</span> Hashing vs AES-GCM Authentication: Key Distinction
+                    </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#algoAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <div class="table-responsive">
+                            <table class="table table-cyber table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>SHA-256 Hashing</th>
+                                        <th>AES-256-GCM GHASH Tag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Cryptographic Purpose</strong></td>
+                                        <td>Unkeyed one-way cryptographic digest.</td>
+                                        <td>Keyed Authenticated Encryption (AEAD).</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Evaluated Over</strong></td>
+                                        <td>Raw plaintext bytes before & after transfer.</td>
+                                        <td>Ciphertext and associated metadata.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Secret Key Required</strong></td>
+                                        <td>No (deterministic mathematical reduction).</td>
+                                        <td>Yes (computed with subkey $H = E_K(0)$).</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Protection Capability</strong></td>
+                                        <td>Detects accidental corruption and transmission errors.</td>
+                                        <td>Detects intentional cryptographic forgery or active tamper attacks.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Threat Modeling & Security Defenses -->
+    <div class="cyber-card p-4 mb-4">
+        <h4 class="fw-bold text-light mb-3">
+            <i class="bi bi-shield-shaded text-info me-2"></i>3. Threat Modeling & Defense Matrix
+        </h4>
+        <div class="table-responsive">
+            <table class="table table-cyber">
+                <thead>
+                    <tr>
+                        <th>Threat Vector</th>
+                        <th>Attacker Objective</th>
+                        <th>SecureLink Countermeasure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Passive Eavesdropping</strong></td>
+                        <td>Sniff file bytes over Wi-Fi / LAN</td>
+                        <td>AES-256-GCM encryption + TLS network transport encryption.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Server Disk Compromise</strong></td>
+                        <td>Exfiltrate stored files from server</td>
+                        <td>Zero-Plaintext Storage. Server stores only ciphertext; AES keys are encrypted with receiver's RSA public key.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Man-in-the-Middle (MITM) Tampering</strong></td>
+                        <td>Modify bits in encrypted file payload</td>
+                        <td>AES-GCM GHASH tag verification fails immediately, throwing <code class="text-danger">InvalidTag</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Unauthorized Decryption</strong></td>
+                        <td>Rogue user attempts to decrypt someone else's file</td>
+                        <td>Strict database access control + RSA private keys are encrypted per user with PKCS#8 and required account password.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Brute-Force Login Attack</strong></td>
+                        <td>Guess user account passwords</td>
+                        <td>Automatic IP and username rate limiting (lockout after 5 failed attempts in 10 minutes).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 4: College Viva Voce Top Questions & Answers -->
+    <div class="cyber-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-light mb-0">
+                <i class="bi bi-chat-left-dots-fill text-info me-2"></i>4. College Viva Voce & Technical Exam Q&A
+            </h4>
+            <span class="badge bg-warning text-dark">High Viva Value</span>
+        </div>
+
+        <div class="accordion accordion-flush" id="vivaAccordion">
+            <div class="accordion-item bg-transparent border-secondary">
+                <h2 class="accordion-header" id="vivaQ1">
+                    <button class="accordion-button bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#vivaA1">
+                        Q1: Why not encrypt the file directly with RSA instead of AES?
+                    </button>
+                </h2>
+                <div id="vivaA1" class="accordion-collapse collapse show" data-bs-parent="#vivaAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <strong>Answer:</strong> RSA is mathematically limited by its modulus size. For RSA-3072 with OAEP padding, the maximum plaintext chunk that can be encrypted in one operation is only 318 bytes ($3072/8 - 2 \times 32 - 2$). Encrypting a 10MB file would require thousands of separate RSA operations, which would be orders of magnitude slower and vulnerable to block reordering attacks. AES-256-GCM processes megabytes per millisecond.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-transparent border-secondary">
+                <h2 class="accordion-header" id="vivaQ2">
+                    <button class="accordion-button collapsed bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#vivaA2">
+                        Q2: What is the purpose of the 96-bit Nonce in AES-GCM?
+                    </button>
+                </h2>
+                <div id="vivaA2" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <strong>Answer:</strong> The nonce (Number used Once) ensures that if the same file is encrypted twice, two completely distinct ciphertexts are produced. Reusing a nonce with the same key in AES-GCM is catastrophic (known as the "nonce-reuse vulnerability") because it allows an attacker to recover the GHASH authentication key and forge messages.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-transparent border-secondary">
+                <h2 class="accordion-header" id="vivaQ3">
+                    <button class="accordion-button collapsed bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#vivaA3">
+                        Q3: How are user private keys protected on the server?
+                    </button>
+                </h2>
+                <div id="vivaA3" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <strong>Answer:</strong> Private keys are never stored in plaintext. They are encrypted using PKCS#8 format with <code>BestAvailableEncryption</code> (AES-256-CBC) derived from the user's master password. Even if an attacker dumps the SQLite database, the private keys remain encrypted and unusable without each individual user's password.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-transparent border-0">
+                <h2 class="accordion-header" id="vivaQ4">
+                    <button class="accordion-button collapsed bg-transparent text-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#vivaA4">
+                        Q4: What happens if an attacker modifies 1 bit in the encrypted file?
+                    </button>
+                </h2>
+                <div id="vivaA4" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                    <div class="accordion-body text-secondary small">
+                        <strong>Answer:</strong> During decryption, AES-256-GCM recalculates the GHASH tag over the ciphertext and compares it against the stored 128-bit authentication tag. Because of the cryptographic avalanche effect and Galois field multiplication properties, the calculated tag will mismatch the stored tag, raising an <code>InvalidTag</code> exception. Decryption aborts instantly, preventing corrupted or malicious payload execution.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Network Deployment & Local TLS Instructions -->
+    <div class="cyber-card p-4">
+        <h4 class="fw-bold text-light mb-3">
+            <i class="bi bi-hdd-network-fill text-info me-2"></i>5. Local Network & TLS Deployment Guide
+        </h4>
+        <p class="text-secondary small">
+            To demonstrate multi-device transfer between two laptops or smartphones connected to the same college Wi-Fi:
+        </p>
+        <ol class="text-secondary small mb-3">
+            <li>Find your machine's local IP address using <code>ipconfig</code> (e.g. <code>192.168.1.45</code>).</li>
+            <li>Run the Flask application bound to <code>0.0.0.0:5000</code>.</li>
+            <li>On Device 1, open <code>http://192.168.1.45:5000</code> and register User A.</li>
+            <li>On Device 2, open <code>http://192.168.1.45:5000</code> and register User B.</li>
+            <li>For encrypted TLS in transit, start Flask with ad-hoc SSL: <code>python app.py --ssl</code> or configure an Nginx / OpenSSL reverse proxy.</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
+

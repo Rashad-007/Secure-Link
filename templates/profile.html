@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Cryptographic Identity - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+                <div>
+                    <h2 class="fw-bold text-light mb-1">
+                        <i class="bi bi-person-badge-fill text-info me-2"></i>Cryptographic Identity & Keys
+                    </h2>
+                    <p class="text-secondary small mb-0">Public Key Infrastructure (PKI) Profile for {{ user.username }}</p>
+                </div>
+                <div>
+                    <span class="badge badge-cipher badge-rsa fs-6">RSA-3072</span>
+                </div>
+            </div>
+
+            <!-- Identity Card -->
+            <div class="cyber-card p-4 mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <span class="text-muted small d-block">Username</span>
+                        <strong class="text-light fs-5">{{ user.username }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted small d-block">Email Address</span>
+                        <span class="text-info">{{ user.email }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="text-muted small d-block">Identity Created</span>
+                        <span class="text-muted small font-monospace">{{ user.created_at }}</span>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-3">
+
+                <!-- Public Key Fingerprint -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small fw-bold">Public Key SHA-256 Fingerprint:</span>
+                        <button class="btn btn-sm btn-link text-info text-decoration-none p-0" onclick="copyToClipboard('pubkey-fingerprint', this)">
+                            <i class="bi bi-clipboard me-1"></i> Copy Fingerprint
+                        </button>
+                    </div>
+                    <div class="code-box py-2 px-3 small text-info font-monospace" id="pubkey-fingerprint">{{ fingerprint }}</div>
+                </div>
+
+                <!-- Public Key PEM -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small fw-bold">RSA-3072 Public Key (SubjectPublicKeyInfo PEM):</span>
+                        <button class="btn btn-sm btn-link text-info text-decoration-none p-0" onclick="copyToClipboard('pubkey-pem', this)">
+                            <i class="bi bi-clipboard me-1"></i> Copy PEM Key
+                        </button>
+                    </div>
+                    <div class="code-box" id="pubkey-pem">{{ user.public_key }}</div>
+                    <div class="form-text text-muted small mt-1">
+                        This public key is stored openly in the database. Anyone on the network can use it to encrypt an ephemeral AES-256 session key destined for you.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Private Key Security Explanation -->
+            <div class="cyber-card p-4 border-info" style="background: rgba(0, 240, 255, 0.03);">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-shield-lock-fill text-info fs-2 me-3"></i>
+                    <div>
+                        <h5 class="fw-bold text-light mb-1">Where is your RSA-3072 Private Key?</h5>
+                        <p class="text-secondary small mb-2">
+                            Your private key is stored in SQLite in an encrypted state using <strong class="text-light">PKCS#8 with AES-256-CBC and PBKDF2/scrypt</strong> key derivation.
+                        </p>
+                        <ul class="text-muted small mb-0">
+                            <li>The server administrator cannot read your private key in plaintext.</li>
+                            <li>The private key is never transmitted over network transfer routes.</li>
+                            <li>Your private key is unlocked in RAM only when you enter your master password to decrypt incoming transfers.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

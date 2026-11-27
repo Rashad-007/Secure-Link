@@ -1,0 +1,4 @@
+transfer_id,sender,receiver,algorithm,status,integrity_verified
+1,alice,bob,AES-256-GCM+RSA-3072,VERIFIED,true
+2,bob,alice,AES-256-GCM+RSA-3072,VERIFIED,true
+3,alice,bob,AES-256-GCM+RSA-3072,VERIFIED,true

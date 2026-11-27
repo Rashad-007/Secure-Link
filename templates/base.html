@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureLink{% endblock %} - Hybrid Cryptography Transfer</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom Cyber Theme -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cyber sticky-top">
+        <div class="container-fluid px-lg-5">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard.index') if 'user_id' not in session else url_for('dashboard.dashboard_view') }}">
+                <i class="bi bi-shield-lock-fill text-info me-2 fs-4"></i>
+                <span>Secure<span class="text-info">Link</span></span>
+                <span class="badge bg-secondary ms-2 text-uppercase fs-6" style="font-size: 0.65rem !important;">DNS Project</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#secureNavbar" aria-controls="secureNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="secureNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    {% if 'user_id' in session %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_view' %}active{% endif %}" href="{{ url_for('dashboard.dashboard_view') }}">
+                            <i class="bi bi-grid-1x2-fill me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'transfer.send_file_view' %}active{% endif %}" href="{{ url_for('transfer.send_file_view') }}">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Send File
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'transfer.received_view' %}active{% endif %}" href="{{ url_for('transfer.received_view') }}">
+                            <i class="bi bi-inbox-fill me-1"></i> Received
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'transfer.history_view' %}active{% endif %}" href="{{ url_for('transfer.history_view') }}">
+                            <i class="bi bi-clock-history me-1"></i> Audit History
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.security_view' %}active{% endif %}" href="{{ url_for('dashboard.security_view') }}">
+                            <i class="bi bi-cpu-fill me-1"></i> Security Architecture
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav mb-2 mb-lg-0 align-items-lg-center">
+                    {% if 'user_id' in session %}
+                    <li class="nav-item me-lg-2">
+                        <a class="nav-link {% if request.endpoint == 'auth.profile' %}active{% endif %}" href="{{ url_for('auth.profile') }}">
+                            <i class="bi bi-key-fill text-info me-1"></i>
+                            <span class="text-light">{{ session['username'] }}</span>
+                            <span class="badge badge-cipher badge-rsa ms-1">RSA-3072</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-outline-danger" href="{{ url_for('auth.logout') }}">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item me-2">
+                        <a class="btn btn-sm btn-cyber-outline" href="{{ url_for('auth.login') }}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-cyber-primary" href="{{ url_for('auth.register') }}">
+                            <i class="bi bi-person-plus-fill me-1"></i> Register
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Flash Alert Banner -->
+    <div class="container-fluid px-lg-5 mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show cyber-card border-0 shadow-sm" role="alert">
+                        <div class="d-flex align-items-center">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill text-success fs-5 me-2"></i>
+                            {% elif category == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill text-danger fs-5 me-2"></i>
+                            {% elif category == 'warning' %}
+                                <i class="bi bi-shield-slash-fill text-warning fs-5 me-2"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill text-info fs-5 me-2"></i>
+                            {% endif %}
+                            <div>{{ message }}</div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container-fluid px-lg-5 text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <span class="fw-semibold text-light">SecureLink</span> &mdash; Hybrid Cryptography Secure File Transfer System
+                    <div class="text-muted" style="font-size: 0.78rem;">
+                        Subject: Data Network Security (DNS) &bull; College Academic Mini-Project
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="badge badge-cipher badge-aes me-1">AES-256-GCM</span>
+                    <span class="badge badge-cipher badge-rsa me-1">RSA-3072 OAEP</span>
+                    <span class="badge badge-cipher badge-sha">SHA-256 Digest</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

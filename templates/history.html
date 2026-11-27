@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Audit History - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom border-secondary">
+        <div>
+            <h2 class="fw-bold text-light mb-1">
+                <i class="bi bi-clock-history text-info me-2"></i>Cryptographic Transfer Audit History
+            </h2>
+            <p class="text-secondary small mb-0">Complete historical record of sent and received encrypted transfers</p>
+        </div>
+
+        <div class="btn-group mt-3 mt-md-0" role="group">
+            <a href="{{ url_for('transfer.history_view', filter='all') }}" class="btn btn-sm {% if current_filter == 'all' %}btn-cyber-primary{% else %}btn-cyber-outline{% endif %}">
+                All Records
+            </a>
+            <a href="{{ url_for('transfer.history_view', filter='sent') }}" class="btn btn-sm {% if current_filter == 'sent' %}btn-cyber-primary{% else %}btn-cyber-outline{% endif %}">
+                Sent by Me
+            </a>
+            <a href="{{ url_for('transfer.history_view', filter='received') }}" class="btn btn-sm {% if current_filter == 'received' %}btn-cyber-primary{% else %}btn-cyber-outline{% endif %}">
+                Received by Me
+            </a>
+        </div>
+    </div>
+
+    <div class="cyber-card">
+        <div class="cyber-card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-light">Transfer Audit Trail</span>
+            <span class="badge bg-secondary font-monospace">{{ transfers|length }} Entries</span>
+        </div>
+        <div class="cyber-card-body p-0">
+            {% if transfers %}
+            <div class="table-responsive">
+                <table class="table table-cyber mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Flow</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Size</th>
+                            <th>Crypto Suite</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th class="text-end">Inspect</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transfers %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold text-light">
+                                    <i class="bi bi-file-earmark-check text-info me-1"></i>{{ t.original_filename }}
+                                </div>
+                                <div class="text-muted small font-monospace" style="font-size: 0.72rem;">
+                                    SHA: {{ t.original_sha256[:12] }}...
+                                </div>
+                            </td>
+                            <td>
+                                {% if t.sender_id == session['user_id'] %}
+                                    <span class="badge bg-info text-dark"><i class="bi bi-arrow-up-right me-1"></i>OUTBOUND</span>
+                                {% else %}
+                                    <span class="badge bg-primary"><i class="bi bi-arrow-down-left me-1"></i>INBOUND</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ t.sender_username }}</td>
+                            <td class="small">{{ t.receiver_username }}</td>
+                            <td class="font-monospace small">{{ t.file_size | filesize }}</td>
+                            <td>
+                                <span class="badge badge-cipher badge-aes">AES-256-GCM</span>
+                                <span class="badge badge-cipher badge-rsa">RSA-3072</span>
+                            </td>
+                            <td>
+                                {% if t.transfer_status == 'VERIFIED' %}
+                                    <span class="badge badge-cipher badge-verified">
+                                        <i class="bi bi-check2-all me-1"></i>VERIFIED
+                                    </span>
+                                {% elif t.transfer_status == 'TAMPERED' or t.is_tampered == 1 %}
+                                    <span class="badge badge-cipher badge-tampered">
+                                        <i class="bi bi-shield-x me-1"></i>TAMPERED
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-cipher badge-sent">
+                                        <i class="bi bi-clock me-1"></i>DISPATCHED
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted font-monospace">{{ t.created_at }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('transfer.decrypt_view', transfer_id=t.transfer_id) }}" class="btn btn-sm btn-cyber-outline">
+                                    <i class="bi bi-search me-1"></i> Inspect
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-clock-history fs-1 d-block mb-2"></i>
+                No transfers found matching filter '{{ current_filter }}'.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

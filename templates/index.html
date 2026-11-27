@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Home - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5 py-4">
+        <div class="col-lg-7">
+            <div class="d-inline-flex align-items-center mb-3 px-3 py-1 rounded-pill" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);">
+                <i class="bi bi-shield-check text-info me-2"></i>
+                <span class="text-info fw-semibold" style="font-size: 0.85rem;">Data Network Security &bull; Academic Mini-Project</span>
+            </div>
+            <h1 class="display-4 fw-bold text-light mb-3">
+                SecureLink <span class="text-info">&ndash;</span> Hybrid Cryptography File Transfer
+            </h1>
+            <p class="lead text-secondary mb-4" style="max-width: 650px;">
+                A defense-in-depth secure transfer system combining the bulk throughput of <strong class="text-light">AES-256-GCM</strong> authenticated encryption with the mathematical security of <strong class="text-light">RSA-3072</strong> key encapsulation and <strong class="text-light">SHA-256</strong> integrity hashing.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-cyber-primary btn-lg">
+                    <i class="bi bi-key-fill me-2"></i> Create Cryptographic Identity
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-cyber-outline btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Account
+                </a>
+                <a href="{{ url_for('dashboard.security_view') }}" class="btn btn-cyber-outline btn-lg">
+                    <i class="bi bi-shield-shaded me-2"></i> Security Architecture
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5 mt-4 mt-lg-0 text-center">
+            <div class="cyber-card p-4 text-start position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="fw-bold text-info"><i class="bi bi-lock-fill me-2"></i>ACTIVE CRYPTOGRAPHIC SUITE</div>
+                    <span class="badge bg-success text-uppercase">NIST Compliant</span>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Bulk Cipher</span>
+                        <span class="text-info font-monospace">AES-256-GCM (256-bit Key, 96-bit IV)</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: #0b0f19;">
+                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Key Encapsulation (KEM)</span>
+                        <span class="text-primary font-monospace">RSA-3072 / OAEP / SHA-256</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: #0b0f19;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Integrity Digest</span>
+                        <span class="text-success font-monospace">SHA-256 (256-bit Digest)</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: #0b0f19;">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Private Key Storage</span>
+                        <span class="text-warning font-monospace">PKCS#8 + PBKDF2 / AES-256-CBC</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: #0b0f19;">
+                        <div class="progress-bar bg-warning" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hybrid Cryptography Workflow Section -->
+    <div class="my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-light">How Hybrid Cryptography Works in SecureLink</h2>
+            <p class="text-secondary">Overcoming the asymmetric speed bottleneck while solving symmetric key distribution.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="cyber-card h-100 p-4">
+                    <div class="fs-1 text-info mb-3"><i class="bi bi-file-earmark-code"></i></div>
+                    <h5 class="fw-bold text-light">1. File Hashing</h5>
+                    <p class="text-muted small">
+                        Sender uploads a file. The system immediately computes an authoritative SHA-256 fingerprint of the plaintext bytes for post-decryption integrity verification.
+                    </p>
+                    <span class="badge badge-cipher badge-sha">SHA-256 Digest</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card h-100 p-4">
+                    <div class="fs-1 text-info mb-3"><i class="bi bi-shield-shaded"></i></div>
+                    <h5 class="fw-bold text-light">2. AES-256-GCM</h5>
+                    <p class="text-muted small">
+                        A fresh 256-bit symmetric session key and a 96-bit nonce are randomly generated. The file is encrypted using AES-GCM, producing ciphertext and an authenticated 128-bit tag.
+                    </p>
+                    <span class="badge badge-cipher badge-aes">Authenticated AEAD</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card h-100 p-4">
+                    <div class="fs-1 text-info mb-3"><i class="bi bi-key-fill"></i></div>
+                    <h5 class="fw-bold text-light">3. RSA-OAEP Wrap</h5>
+                    <p class="text-muted small">
+                        The ephemeral AES session key is encrypted with the recipient's public RSA-3072 key using Optimal Asymmetric Encryption Padding (OAEP). Only the recipient can unlock it.
+                    </p>
+                    <span class="badge badge-cipher badge-rsa">Asymmetric KEM</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card h-100 p-4">
+                    <div class="fs-1 text-info mb-3"><i class="bi bi-check2-circle"></i></div>
+                    <h5 class="fw-bold text-light">4. Decrypt & Verify</h5>
+                    <p class="text-muted small">
+                        Recipient decrypts the AES key with their RSA-3072 private key, decrypts ciphertext, validates the GCM authentication tag, and confirms SHA-256 digest match.
+                    </p>
+                    <span class="badge badge-cipher badge-verified">End-to-End Verified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Highlights -->
+    <div class="row g-4 my-5">
+        <div class="col-md-4">
+            <div class="cyber-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-server text-info fs-3 me-3"></i>
+                    <h5 class="fw-bold text-light mb-0">Zero Plaintext Storage</h5>
+                </div>
+                <p class="text-muted small mb-0">
+                    The server never writes unencrypted files to permanent disk storage. Only ciphertext with random nonces and encrypted keys are retained.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="cyber-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-eye-slash-fill text-danger fs-3 me-3"></i>
+                    <h5 class="fw-bold text-light mb-0">Tamper-Proof Guarantee</h5>
+                </div>
+                <p class="text-muted small mb-0">
+                    If an attacker alters even a single bit in the encrypted payload on the server, the AES-GCM GHASH authentication tag instantly fails, blocking decryption.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="cyber-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-fingerprint text-success fs-3 me-3"></i>
+                    <h5 class="fw-bold text-light mb-0">Strict Authorization</h5>
+                </div>
+                <p class="text-muted small mb-0">
+                    Granular access control policies ensure that users can only view, download, or decrypt transfer records they directly authored or were assigned as the recipient.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

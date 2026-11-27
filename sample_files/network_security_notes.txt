@@ -1,0 +1,13 @@
+===========================================================
+DATA NETWORK SECURITY (DNS) - COLLEGE LABORATORY EXPERIMENT
+Project: SecureLink Hybrid Cryptography File Transfer
+===========================================================
+
+Classification: CONFIDENTIAL ACADEMIC RECORD
+Ciphers Applied: AES-256-GCM (Authenticated Encryption)
+Key Exchange: RSA-3072 / OAEP with SHA-256 MGF1
+Integrity Verification: SHA-256 Constant-Time Comparison
+
+This document verifies that bulk plaintext has been successfully
+encrypted by the sender, encapsulated with the receiver's public key,
+stored as zero-plaintext ciphertext, and recovered intact by the receiver.

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Register - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="cyber-card p-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3);">
+                        <i class="bi bi-key-fill text-primary fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-light">Register Cryptographic Identity</h3>
+                    <p class="text-muted small">Generates an RSA-3072 public/private key pair</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control form-cyber" id="username" name="username" value="{{ username or '' }}" placeholder="e.g. bob" required autofocus>
+                        <div class="form-text text-muted small">3 to 30 alphanumeric characters, hyphens, or underscores.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control form-cyber" id="email" name="email" value="{{ email or '' }}" placeholder="bob@university.edu" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Master Password</label>
+                        <input type="password" class="form-control form-cyber" id="password" name="password" placeholder="Minimum 8 characters" required>
+                        <div class="form-text text-muted small">Used to derive encryption key for your stored RSA private key.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Master Password</label>
+                        <input type="password" class="form-control form-cyber" id="confirm_password" name="confirm_password" placeholder="Repeat master password" required>
+                    </div>
+
+                    <div class="cyber-card p-3 my-3" style="background: #060911;">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bi bi-cpu text-info me-2"></i>
+                            <span class="small fw-bold text-info">Cryptographic Key Pair Generation</span>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            Upon submission, SecureLink will generate a 3072-bit RSA key pair. The public key is stored in SQLite for sender access; the private key is encrypted via PKCS#8 before storage.
+                        </p>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-cyber-primary py-2">
+                            <i class="bi bi-shield-lock me-1"></i> Generate Keys & Register
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-4 pt-3 border-top border-secondary text-center small">
+                    <span class="text-muted">Already have keys registered?</span>
+                    <a href="{{ url_for('auth.login') }}" class="text-info fw-semibold text-decoration-none ms-1">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Send Encrypted File - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="cyber-card p-4">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary">
+                    <div class="d-inline-flex p-3 rounded-circle me-3" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);">
+                        <i class="bi bi-shield-lock-fill text-info fs-3"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-light mb-1">Encrypted File Dispatch</h3>
+                        <p class="text-muted small mb-0">AES-256-GCM Bulk Encryption + RSA-3072 Key Encapsulation</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('transfer.send_file_view') }}" enctype="multipart/form-data">
+                    <!-- Recipient Selection -->
+                    <div class="mb-4">
+                        <label for="receiver_id" class="form-label fw-bold">Select Intended Recipient</label>
+                        {% if recipients %}
+                        <select class="form-select form-cyber" id="receiver_id" name="receiver_id" required>
+                            <option value="" disabled selected>-- Choose a registered user with active RSA-3072 public key --</option>
+                            {% for r in recipients %}
+                            <option value="{{ r.user_id }}">
+                                {{ r.username }} ({{ r.email }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text text-muted small">
+                            Recipient's RSA-3072 public key will be fetched from the database to securely encapsulate the file's ephemeral AES-256 key.
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning border-0 small">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            No other registered users found. Please register another user account (e.g. "bob") in a second browser window to test end-to-end file transfer!
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- File Upload Input -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select File for Encryption</label>
+                        <div class="cyber-card p-4 text-center border-dashed position-relative" style="background: #080d18; border-style: dashed; border-width: 2px;">
+                            <i class="bi bi-cloud-arrow-up-fill text-info fs-1 mb-2 d-block"></i>
+                            <p class="text-light mb-1 fw-semibold">Click to browse or drag file here</p>
+                            <p class="text-muted small mb-3">Supported formats: PDF, TXT, DOCX, PNG, JPG, ZIP, CSV, JSON (Up to 16MB)</p>
+                            <input type="file" class="form-control form-cyber" id="file-upload-input" name="file" required>
+                            <div id="file-selected-name" class="mt-3 small font-monospace"></div>
+                        </div>
+                    </div>
+
+                    <!-- Cryptographic Pipeline Explainer Card -->
+                    <div class="cyber-card p-3 mb-4" style="background: #060911;">
+                        <div class="fw-bold text-info small mb-2"><i class="bi bi-gear-wide-connected me-1"></i> AUTOMATED CRYPTOGRAPHIC SEQUENCE</div>
+                        <ul class="list-unstyled small text-muted mb-0">
+                            <li class="mb-1"><i class="bi bi-check2 text-success me-1"></i> <strong>SHA-256:</strong> Hashes raw plaintext for pre-encryption integrity benchmark.</li>
+                            <li class="mb-1"><i class="bi bi-check2 text-info me-1"></i> <strong>AES-256-GCM:</strong> Encrypts file payload using 256-bit symmetric key + 96-bit nonce.</li>
+                            <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i> <strong>RSA-OAEP:</strong> Encapsulates symmetric key using recipient's RSA-3072 public key.</li>
+                            <li><i class="bi bi-check2 text-warning me-1"></i> <strong>Zero Retention:</strong> Plaintext and raw AES key are wiped immediately from server RAM.</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-cyber-primary py-2" {% if not recipients %}disabled{% endif %}>
+                            <i class="bi bi-lock-fill me-1"></i> Encrypt & Dispatch File
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

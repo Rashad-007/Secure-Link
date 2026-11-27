@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Cryptographic Verification - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+                <div>
+                    <h2 class="fw-bold text-light mb-1">
+                        <i class="bi bi-shield-check text-info me-2"></i>Cryptographic Inspection & Decryption
+                    </h2>
+                    <p class="text-secondary small mb-0">Transmission #{{ transfer.transfer_id }} &bull; {{ transfer.original_filename }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('transfer.history_view') }}" class="btn btn-sm btn-cyber-outline">
+                        <i class="bi bi-arrow-left me-1"></i> Back to History
+                    </a>
+                </div>
+            </div>
+
+            <!-- Transfer Metadata Card -->
+            <div class="cyber-card p-4 mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Original File</span>
+                        <strong class="text-light fs-6">{{ transfer.original_filename }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">File Size</span>
+                        <span class="font-monospace text-info">{{ transfer.file_size | filesize }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Sender</span>
+                        <span class="badge bg-dark border border-secondary text-light">{{ transfer.sender_username }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Receiver</span>
+                        <span class="badge bg-dark border border-secondary text-light">{{ transfer.receiver_username }}</span>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-3">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <span class="text-muted small d-block mb-1">Server Encrypted File Storage Name</span>
+                        <div class="code-box py-1 px-2 small">{{ transfer.encrypted_filename }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-muted small d-block mb-1">Pre-Encryption Expected SHA-256 Digest</span>
+                        <div class="code-box py-1 px-2 small text-success" id="orig-hash">{{ transfer.original_sha256 }}</div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+                    <span class="small text-muted me-2">Algorithms Applied:</span>
+                    <span class="badge badge-cipher badge-aes">AES-256-GCM</span>
+                    <span class="badge badge-cipher badge-rsa">RSA-3072 / OAEP / SHA-256</span>
+                    <span class="badge badge-cipher badge-sha">SHA-256 Integrity Verification</span>
+                    <a href="{{ url_for('transfer.download_encrypted', transfer_id=transfer.transfer_id) }}" class="btn btn-sm btn-cyber-outline ms-auto">
+                        <i class="bi bi-file-binary me-1"></i> Download Raw Encrypted (.enc)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Decryption Results (if decrypted in this request) -->
+            {% if result %}
+            <div class="cyber-card p-4 mb-4 border-success" style="border-width: 2px;">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-patch-check-fill text-success fs-2 me-3"></i>
+                    <div>
+                        <h4 class="fw-bold text-light mb-0">Decryption & Verification Successful</h4>
+                        <span class="text-muted small">AES-256-GCM authentication tag verified; SHA-256 bit-level match confirmed.</span>
+                    </div>
+                </div>
+
+                <div class="cyber-card p-3 my-3" style="background: #060911;">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">1. Original Plaintext SHA-256 Digest</span>
+                            <div class="font-monospace text-info small text-break">{{ result.original_sha256 }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">2. Decrypted Plaintext SHA-256 Digest</span>
+                            <div class="font-monospace text-success small text-break">{{ result.decrypted_sha256 }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-success me-2"><i class="bi bi-check2-all me-1"></i>SHA-256 HASH MATCH: YES</span>
+                            <span class="badge bg-info text-dark"><i class="bi bi-shield-lock-fill me-1"></i>AES-GCM GHASH TAG: VALID</span>
+                        </div>
+                        <span class="text-success small fw-semibold">Integrity 100% Intact</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <form method="POST" action="{{ url_for('transfer.download_decrypted', transfer_id=transfer.transfer_id) }}" class="d-inline">
+                        <input type="hidden" name="password" id="download_password">
+                        <button type="submit" class="btn btn-cyber-primary btn-lg" onclick="document.getElementById('download_password').value=prompt('Confirm your account password to download decrypted file:'); return !!document.getElementById('download_password').value;">
+                            <i class="bi bi-download me-2"></i> Download Decrypted Plaintext File
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Decryption Form for Receiver -->
+            {% if is_receiver %}
+            <div class="cyber-card p-4 mb-4">
+                <h5 class="fw-bold text-light mb-2"><i class="bi bi-key-fill text-info me-2"></i>Unlock RSA-3072 Private Key & Decrypt</h5>
+                <p class="text-muted small mb-3">
+                    Your private key is protected via PKCS#8 AES-256-CBC encryption in the database. Enter your account password to decrypt your RSA key, recover the ephemeral AES-256 session key, and verify the file.
+                </p>
+
+                <form method="POST" action="{{ url_for('transfer.decrypt_view', transfer_id=transfer.transfer_id) }}">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-8">
+                            <input type="password" class="form-control form-cyber" name="password" placeholder="Enter your account master password" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-cyber-primary w-100">
+                                <i class="bi bi-unlock-fill me-1"></i> Decrypt & Verify File
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="alert alert-secondary cyber-card border-0 p-4 mb-4">
+                <div class="d-flex">
+                    <i class="bi bi-info-circle-fill text-info fs-3 me-3"></i>
+                    <div>
+                        <h6 class="fw-bold text-light mb-1">Sender Perspective Notice</h6>
+                        <p class="text-muted small mb-0">
+                            You are the sender of this file. Only the designated recipient (<strong class="text-light">{{ transfer.receiver_username }}</strong>) possesses the private RSA key required to decrypt the AES session key and extract the original file.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- College Viva & Demonstration Lab: Ciphertext Tamper Attack Simulation -->
+            <div class="cyber-card p-4 border-danger" style="background: rgba(244, 63, 94, 0.03);">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold text-danger mb-1">
+                            <i class="bi bi-bug-fill me-2"></i>Academic Attack Simulation Lab (DNS Viva Test)
+                        </h5>
+                        <p class="text-muted small mb-0">
+                            Demonstrate how AES-256-GCM authenticated encryption defends against ciphertext manipulation.
+                        </p>
+                    </div>
+                    <span class="badge bg-danger">Viva Demonstration</span>
+                </div>
+
+                <p class="text-secondary small">
+                    Clicking the button below directly modifies random bytes of the encrypted file stored on the server disk. When the recipient subsequently attempts decryption, the <strong class="text-light">AES-256-GCM authentication tag verification will fail</strong>, raising an <strong class="text-danger">InvalidTag</strong> exception and aborting decryption before any corrupted file can be released.
+                </p>
+
+                <form method="POST" action="{{ url_for('transfer.tamper_view', transfer_id=transfer.transfer_id) }}">
+                    <button type="submit" class="btn btn-cyber-danger" onclick="return confirm('Simulate an active tampering attack by intentionally corrupting bytes in the server-side encrypted file?');">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Simulate Ciphertext Tampering Attack
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

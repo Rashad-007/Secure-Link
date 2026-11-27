@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Received Files - SecureLink{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+        <div>
+            <h2 class="fw-bold text-light mb-1">
+                <i class="bi bi-inbox-fill text-info me-2"></i>Incoming Encrypted Transmissions
+            </h2>
+            <p class="text-secondary small mb-0">Files sent to your account requiring your RSA-3072 private key to unlock</p>
+        </div>
+        <a href="{{ url_for('transfer.send_file_view') }}" class="btn btn-cyber-primary">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Send a File
+        </a>
+    </div>
+
+    <div class="cyber-card">
+        <div class="cyber-card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-light">Files Received</span>
+            <span class="badge bg-secondary font-monospace">{{ transfers|length }} Transmission(s)</span>
+        </div>
+        <div class="cyber-card-body p-0">
+            {% if transfers %}
+            <div class="table-responsive">
+                <table class="table table-cyber mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Original File</th>
+                            <th>Sender</th>
+                            <th>Size</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                            <th>Original SHA-256</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transfers %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold text-light">
+                                    <i class="bi bi-file-earmark-lock-fill text-info me-2"></i>{{ t.original_filename }}
+                                </div>
+                                <div class="text-muted small font-monospace" style="font-size: 0.75rem;">
+                                    {{ t.encrypted_filename }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark border border-secondary text-light">
+                                    <i class="bi bi-person-fill text-secondary me-1"></i>{{ t.sender_username }}
+                                </span>
+                            </td>
+                            <td class="font-monospace small">{{ t.file_size | filesize }}</td>
+                            <td>
+                                {% if t.transfer_status == 'VERIFIED' %}
+                                    <span class="badge badge-cipher badge-verified">
+                                        <i class="bi bi-check-circle-fill me-1"></i>VERIFIED
+                                    </span>
+                                {% elif t.transfer_status == 'TAMPERED' or t.is_tampered == 1 %}
+                                    <span class="badge badge-cipher badge-tampered">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>TAMPERED
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-cipher badge-sent">
+                                        <i class="bi bi-hourglass-split me-1"></i>READY TO DECRYPT
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted font-monospace">{{ t.created_at }}</td>
+                            <td class="small font-monospace text-secondary" style="font-size: 0.75rem;">
+                                {{ t.original_sha256[:16] }}...
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('transfer.decrypt_view', transfer_id=t.transfer_id) }}" class="btn btn-sm btn-cyber-primary me-1">
+                                    <i class="bi bi-unlock-fill me-1"></i> Decrypt & Inspect
+                                </a>
+                                <a href="{{ url_for('transfer.download_encrypted', transfer_id=t.transfer_id) }}" class="btn btn-sm btn-cyber-outline" title="Download raw encrypted payload for inspection">
+                                    <i class="bi bi-file-binary"></i> Raw .enc
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No files have been sent to you yet. Ask another registered user to send you an encrypted file!
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
